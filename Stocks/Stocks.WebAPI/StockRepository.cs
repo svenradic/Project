@@ -4,12 +4,15 @@ namespace Stocks.WebAPI
 {
     public static class StockRepository
     {
-        private static ICollection<Stock> Stocks = new List<Stock>()
+        private static ICollection<Stock> Stocks;
+        static StockRepository()
         {
-            new Stock{ Id = 1, Symbol = "AAPL", CompanyName = "Apple Inc", CurrentPrice = 189.99, MarketCap = 32143154325 },
-            new Stock{ Id = 2, Symbol = "MSFT", CompanyName = "Microsoft", CurrentPrice = 430.32, MarketCap = 51135545498 },
-
-        };
+            Stocks = new List<Stock>()
+            {
+                new Stock{ Id = 1, Symbol = "AAPL", CompanyName = "Apple Inc", CurrentPrice = 189.99, MarketCap = 32143154325 },
+                new Stock{ Id = 2, Symbol = "MSFT", CompanyName = "Microsoft", CurrentPrice = 430.32, MarketCap = 51135545498 },
+            };
+        }
 
         public static ICollection<Stock> GetAll()
         {
@@ -24,7 +27,7 @@ namespace Stocks.WebAPI
 
         public static Stock? Add(Stock stock)
         {
-            int newId = Stocks.Any() ? Stocks.Count() + 1 : 1;
+            int newId = Stocks.Any() ? Stocks.Max(s => s.Id) + 1 : 1;
             stock.Id = newId;
             Stocks.Add(stock);
             return stock;
