@@ -8,7 +8,6 @@ namespace Stocks.WebAPI.Controllers
     [Route("[controller]/")]
     public class StockController: ControllerBase
     {
-
         private IConfiguration configuration;
         public StockController(IConfiguration configuration)
         {
@@ -18,6 +17,7 @@ namespace Stocks.WebAPI.Controllers
         [HttpGet("stocks")]
         public async Task<IActionResult> GetAll()
         {
+            // var conn = WebApplication.Create().Configuration.GetConnectionString("DefaultConnection");
             try
             {
                 using NpgsqlConnection conn = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
@@ -25,27 +25,24 @@ namespace Stocks.WebAPI.Controllers
                 ICollection<Stock> stocks = new List<Stock>();
                 await conn.OpenAsync();
 
-                command.CommandText = "SELECT * FROM \"Stocks\"";
+                command.CommandText = "SELECT * FROM \"Stocks\" WHERE \"IsActive\" = @isActive";
+                command.Parameters.AddWithValue("@isActive", true);
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     {
-                        var isActive = reader.GetBoolean(6);
-                        
-                        if (isActive == true)
+                        var stock = new Stock
                         {
-                             var stock = new Stock
-                            {
-                                Id = reader.GetGuid(0),
-                                Symbol = reader.GetString(1),
-                                CompanyName = reader.GetString(2),
-                                CurrentPrice = reader.GetDouble(3),
-                                MarketCap = (long)reader.GetDouble(4),
-                                TraderId = reader.GetGuid(5)
-                            };
-                            stocks.Add(stock);
-                        }
+                            Id = reader.GetGuid(0),
+                            Symbol = reader.GetString(1),
+                            CompanyName = reader.GetString(2),
+                            CurrentPrice = reader.GetDouble(3),
+                            MarketCap = (long)reader.GetDouble(4),
+                            TraderId = reader.GetGuid(5)
+                        };
+                        stocks.Add(stock);
+                        
                     }
                 }
 
@@ -68,23 +65,20 @@ namespace Stocks.WebAPI.Controllers
                 Stock stock = new Stock();
                 await conn.OpenAsync();
 
-                command.CommandText = "SELECT * FROM \"Stocks\" WHERE \"Stocks\".\"Id\" = @Id";
+                command.CommandText = "SELECT * FROM \"Stocks\" WHERE \"Stocks\".\"Id\" = @Id and \"IsActive\" = @isActive";
                 command.Parameters.AddWithValue("@Id", stockId);
+                command.Parameters.AddWithValue("@isActive", true);
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     { 
-                        if(reader.GetBoolean(6) == true)
-                        {
                             stock.Id = reader.GetGuid(0);
                             stock.Symbol = reader.GetString(1);
                             stock.CompanyName = reader.GetString(2);
                             stock.CurrentPrice = reader.GetDouble(3);
                             stock.MarketCap = (long)reader.GetDouble(4);
                             stock.TraderId = reader.GetGuid(5);
-                        }
-
                     }
                 }
 
@@ -119,9 +113,6 @@ namespace Stocks.WebAPI.Controllers
                 comand.Parameters.AddWithValue("@CurrentPrice", stock.CurrentPrice);
                 comand.Parameters.AddWithValue("@MarketCap", stock.MarketCap);
                 comand.Parameters.AddWithValue("@TraderId", stock.TraderId);
-                
-                
-
 
                 int commitNumber = await comand.ExecuteNonQueryAsync();
                 if(commitNumber == 0)
