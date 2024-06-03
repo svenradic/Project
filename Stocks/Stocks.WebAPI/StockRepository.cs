@@ -9,8 +9,8 @@ namespace Stocks.WebAPI
         {
             Stocks = new List<Stock>()
             {
-                new Stock{ Id = 1, Symbol = "AAPL", CompanyName = "Apple Inc", CurrentPrice = 189.99, MarketCap = 32143154325 },
-                new Stock{ Id = 2, Symbol = "MSFT", CompanyName = "Microsoft", CurrentPrice = 430.32, MarketCap = 51135545498 },
+                new Stock{ Id = Guid.NewGuid(), Symbol = "AAPL", CompanyName = "Apple Inc", CurrentPrice = 189.99, MarketCap = 32143154325 },
+                new Stock{ Id = Guid.NewGuid(), Symbol = "MSFT", CompanyName = "Microsoft", CurrentPrice = 430.32, MarketCap = 51135545498 },
             };
         }
 
@@ -19,7 +19,7 @@ namespace Stocks.WebAPI
             return Stocks;
         }
 
-        public static Stock? Get(int id)
+        public static Stock? Get(Guid id)
         {
             var stock = Stocks.FirstOrDefault(s => s.Id == id);
             return stock;
@@ -27,13 +27,13 @@ namespace Stocks.WebAPI
 
         public static Stock? Add(Stock stock)
         {
-            int newId = Stocks.Any() ? Stocks.Max(s => s.Id) + 1 : 1;
+            Guid newId = Guid.NewGuid();
             stock.Id = newId;
             Stocks.Add(stock);
             return stock;
         }
 
-        public static Stock? Update(Stock stock, int id)
+        public static Stock? Update(Stock stock, Guid id)
         {
             var stockToUpdate = Stocks.FirstOrDefault(s => s.Id == id);
             if (stockToUpdate != null)
@@ -45,7 +45,7 @@ namespace Stocks.WebAPI
             }
             return stockToUpdate;
         }
-        public static int Delete(int id) 
+        public static int Delete(Guid id) 
         {
             var stockToDelete = Stocks.FirstOrDefault(s => s.Id ==id);
             if (stockToDelete != null)
