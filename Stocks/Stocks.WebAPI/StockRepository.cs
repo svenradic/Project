@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Stocks.Model;
 
 namespace Stocks.WebAPI
 {

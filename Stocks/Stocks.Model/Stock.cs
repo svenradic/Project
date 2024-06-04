@@ -1,4 +1,4 @@
-namespace Stocks.WebAPI
+namespace Stocks.Model
 {
     public class Stock
     {

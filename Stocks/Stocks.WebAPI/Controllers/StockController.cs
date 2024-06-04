@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using Stocks.Model;
+using Stocks.Service;
+
 
 
 namespace Stocks.WebAPI.Controllers
@@ -8,10 +11,10 @@ namespace Stocks.WebAPI.Controllers
     [Route("[controller]/")]
     public class StockController: ControllerBase
     {
-        private IConfiguration configuration;
+        private StockService stockService;
         public StockController(IConfiguration configuration)
         {
-            this.configuration = configuration;
+            this.stockService = new StockService(configuration.GetConnectionString("DefaultConnection"));
         }
 
         [HttpGet("stocks")]
@@ -20,31 +23,7 @@ namespace Stocks.WebAPI.Controllers
             // var conn = WebApplication.Create().Configuration.GetConnectionString("DefaultConnection");
             try
             {
-                using NpgsqlConnection conn = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
-                using NpgsqlCommand command = new NpgsqlCommand("", conn);
-                ICollection<Stock> stocks = new List<Stock>();
-                await conn.OpenAsync();
-
-                command.CommandText = "SELECT * FROM \"Stocks\" WHERE \"IsActive\" = @isActive";
-                command.Parameters.AddWithValue("@isActive", true);
-
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        var stock = new Stock
-                        {
-                            Id = reader.GetGuid(0),
-                            Symbol = reader.GetString(1),
-                            CompanyName = reader.GetString(2),
-                            CurrentPrice = reader.GetDouble(3),
-                            MarketCap = (long)reader.GetDouble(4),
-                            TraderId = reader.GetGuid(5)
-                        };
-                        stocks.Add(stock);
-                        
-                    }
-                }
+                ICollection<Stock> stocks = await stockService.GetAll();
 
                 return Ok(stocks);
             }
@@ -60,27 +39,7 @@ namespace Stocks.WebAPI.Controllers
         {
             try
             {
-                using NpgsqlConnection conn = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
-                using NpgsqlCommand command = new NpgsqlCommand("", conn);
-                Stock stock = new Stock();
-                await conn.OpenAsync();
-
-                command.CommandText = "SELECT * FROM \"Stocks\" WHERE \"Stocks\".\"Id\" = @Id and \"IsActive\" = @isActive";
-                command.Parameters.AddWithValue("@Id", stockId);
-                command.Parameters.AddWithValue("@isActive", true);
-
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    { 
-                            stock.Id = reader.GetGuid(0);
-                            stock.Symbol = reader.GetString(1);
-                            stock.CompanyName = reader.GetString(2);
-                            stock.CurrentPrice = reader.GetDouble(3);
-                            stock.MarketCap = (long)reader.GetDouble(4);
-                            stock.TraderId = reader.GetGuid(5);
-                    }
-                }
+                Stock stock = await stockService.Get(stockId);
 
                 return Ok(stock);
             }
@@ -102,19 +61,8 @@ namespace Stocks.WebAPI.Controllers
             }
             try
             {
-                using NpgsqlConnection conn = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
-                using NpgsqlCommand comand = new NpgsqlCommand("", conn);
-                await conn.OpenAsync(); 
+                int commitNumber = await stockService.Post(stock);
 
-                comand.CommandText = "INSERT INTO \"Stocks\" (\"Symbol\", \"CompanyName\", \"CurrentPrice\", \"MarketCap\", \"TraderId\") " +
-                    "VALUES (@Symbol, @CompanyName, @CurrentPrice, @MarketCap, @TraderId)";
-                comand.Parameters.AddWithValue("@Symbol", stock.Symbol);
-                comand.Parameters.AddWithValue("@CompanyName", stock.CompanyName);
-                comand.Parameters.AddWithValue("@CurrentPrice", stock.CurrentPrice);
-                comand.Parameters.AddWithValue("@MarketCap", stock.MarketCap);
-                comand.Parameters.AddWithValue("@TraderId", stock.TraderId);
-
-                int commitNumber = await comand.ExecuteNonQueryAsync();
                 if(commitNumber == 0)
                 {
                     return BadRequest();
@@ -135,24 +83,8 @@ namespace Stocks.WebAPI.Controllers
             {
                 return BadRequest();
             }
-            try
-            {
-                using NpgsqlConnection conn = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
-                using NpgsqlCommand comand = new NpgsqlCommand("", conn);
-                await conn.OpenAsync();
-
-                comand.CommandText = "UPDATE \"Stocks\" SET \"Symbol\" = @Symbol, \"CompanyName\" = @CompanyName, " +
-                    "\"CurrentPrice\" = @CurrentPrice, \"MarketCap\" = @MarketCap, \"TraderId\" = @TraderId WHERE \"Id\" = @stockId";
-
-                comand.Parameters.AddWithValue("@Symbol", stock.Symbol);
-                comand.Parameters.AddWithValue("@CompanyName", stock.CompanyName);
-                comand.Parameters.AddWithValue("@CurrentPrice", stock.CurrentPrice);
-                comand.Parameters.AddWithValue("@MarketCap", stock.MarketCap);
-                comand.Parameters.AddWithValue("@TraderId", stock.TraderId);
-                comand.Parameters.AddWithValue("@stockId", stockId);
-
-
-                int commitNumber = await comand.ExecuteNonQueryAsync();
+            try{
+                int commitNumber = await stockService.Put(stock, stockId);
                 if (commitNumber == 0)
                 {
                     return BadRequest();
@@ -172,18 +104,8 @@ namespace Stocks.WebAPI.Controllers
         public async Task<IActionResult> Delete(Guid stockId)
         {
             try
-            {
-                using NpgsqlConnection conn = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
-                using NpgsqlCommand comand = new NpgsqlCommand("", conn);
-                await conn.OpenAsync();
-
-                comand.CommandText = "UPDATE \"Stocks\" SET \"IsActive\" = @IsActive WHERE \"Id\" = @stockId";
-
-                comand.Parameters.AddWithValue("@IsActive", false);
-                comand.Parameters.AddWithValue("@stockId", stockId);
-
-
-                int commitNumber = await comand.ExecuteNonQueryAsync();
+            { 
+                int commitNumber = await stockService.Delete(stockId);
                 if (commitNumber == 0)
                 {
                     return BadRequest();
