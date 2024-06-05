@@ -16,27 +16,27 @@ namespace Stocks.Service
         {
             traderRepository = new TraderRepository(connectionString);
         }
-        public Task<int> Delete(Guid id)
+        public Task<int> DeleteAsync(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Trader> Get(Guid id)
+        public async Task<Trader> GetAsync(Guid id)
+        {
+            return await traderRepository.GetAsync(id);
+        }
+
+        public async Task<ICollection<Trader>> GetAllAsync()
+        {
+            return await traderRepository.GetAllAsync();
+        }
+
+        public Task<int> PostAsync(Stock stock)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<ICollection<Trader>> GetAll()
-        {
-            return await traderRepository.GetAll();
-        }
-
-        public Task<int> Post(Stock stock)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> Put(Stock stock, Guid id)
+        public Task<int> PutAsync(Stock stock, Guid id)
         {
             throw new NotImplementedException();
         }

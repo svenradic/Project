@@ -22,8 +22,23 @@ namespace Stocks.WebAPI.Controllers
             // var conn = WebApplication.Create().Configuration.GetConnectionString("DefaultConnection");
             try
             {
-                ICollection<Trader> traders = await traderService.GetAll();
+                ICollection<Trader> traders = await traderService.GetAllAsync();
                 return Ok(traders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("traders/{traderId:guid}")]
+        public async Task<IActionResult> Get(Guid traderId)
+        {
+            try
+            {
+                Trader trader = await traderService.GetAsync(traderId);
+
+                return Ok(trader);
             }
             catch (Exception ex)
             {

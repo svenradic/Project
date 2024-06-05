@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Stocks.Common;
 using Stocks.Model;
 using Stocks.Repository;
 using Stocks.Service.Common;
@@ -21,29 +22,33 @@ namespace Stocks.Service
             this.stockRepository = stockRepository;
         }
 
-        public async Task<int> Delete(Guid id)
+        public async Task<int> DeleteAsync(Guid id)
         {
-            return await stockRepository.Delete(id);
+            return await stockRepository.DeleteAsync(id);
         }
 
-        public async Task<Stock> Get(Guid id)
+        public async Task<Stock> GetAsync(Guid id)
         {
-            return await stockRepository.Get(id);
+            return await stockRepository.GetAsync(id);
+        }
+        public async Task<ICollection<Stock>> GetAsync(StockFilter filter, OrderByFilter order, PageFilter page)
+        {
+            return await stockRepository.GetAsync(filter, order, page);
         }
 
-        public async Task<ICollection<Stock>> GetAll()
+        public async Task<ICollection<Stock>> GetAllAsync()
         {
-            return await stockRepository.GetAll();
+            return await stockRepository.GetAllAsync();
         }
 
-        public async Task<int> Post(Stock stock)
+        public async Task<int> PostAsync(Stock stock)
         {
-            return await stockRepository.Post(stock);
+            return await stockRepository.PostAsync(stock);
         }
 
-        public async Task<int> Put(Stock stock, Guid id)
+        public async Task<int> PutAsync(Stock stock, Guid id)
         {
-            return await stockRepository.Put(stock, id);
+            return await stockRepository.PutAsync(stock, id);
         }
 
     }
