@@ -2,30 +2,30 @@
 using Npgsql;
 using Stocks.Common;
 using Stocks.Model;
-using Stocks.Service;
+using Stocks.Service.Common;
 
 
 
-namespace Stocks.WebAPI.Controllers
+namespace Stocks.WebAPI.Controllersyy
 {
     [ApiController]
     [Route("[controller]/")]
     public class StockController: ControllerBase
     {
-        private StockService stockService;
-        public StockController(IConfiguration configuration)
+        private IService<Stock> stockService;
+        public StockController(IService<Stock> stockService)
         {
-            this.stockService = new StockService(configuration.GetConnectionString("DefaultConnection"));
+            this.stockService = stockService;
         }
 
-        [HttpGet("stocks/")]
+        [HttpGet("stocks")]
         public async Task<IActionResult> Get(Guid? stockId = null, string symbolQuery = "", string companyQuery = "", 
             long? minMarketCap = null, long? maxMarketCap = null, double? minCurrentPrice = null, double? maxCurrentPrice = null,
-            string orderBy = "CurrentPrice", string sortOrder = "DESC", int rpp = 10, int pageNumber = 1)
+            string orderBy = "Symbol", string sortOrder = "ASC", int rpp = 10, int pageNumber = 1)
         {
             try
             {
-                StockFilter filter = new StockFilter(stockId, symbolQuery, companyQuery, minMarketCap, maxMarketCap, minCurrentPrice, maxCurrentPrice);
+                IFilter filter = new StockFilter(stockId, symbolQuery, companyQuery, minMarketCap, maxMarketCap, minCurrentPrice, maxCurrentPrice);
                 OrderByFilter order = new OrderByFilter(orderBy, sortOrder);
                 PageFilter page = new PageFilter(rpp, pageNumber);
 

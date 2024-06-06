@@ -5,19 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Stocks.Common;
 using Stocks.Model;
-using Stocks.Repository;
+using Stocks.Repository.Common;
 using Stocks.Service.Common;
 
 namespace Stocks.Service
 {
     public class StockService: IService<Stock>
     {
-        private StockRepository stockRepository;
-        public StockService(string connectionString)
-        {
-            stockRepository = new StockRepository(connectionString);
-        }
-        public StockService(StockRepository stockRepository)
+        private IRepository<Stock> stockRepository;
+        public StockService(IRepository<Stock> stockRepository)
         {
             this.stockRepository = stockRepository;
         }
@@ -26,19 +22,9 @@ namespace Stocks.Service
         {
             return await stockRepository.DeleteAsync(id);
         }
-
-        public async Task<Stock> GetAsync(Guid id)
-        {
-            return await stockRepository.GetAsync(id);
-        }
-        public async Task<ICollection<Stock>> GetAsync(StockFilter filter, OrderByFilter order, PageFilter page)
+        public async Task<ICollection<Stock>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
         {
             return await stockRepository.GetAsync(filter, order, page);
-        }
-
-        public async Task<ICollection<Stock>> GetAllAsync()
-        {
-            return await stockRepository.GetAllAsync();
         }
 
         public async Task<int> PostAsync(Stock stock)

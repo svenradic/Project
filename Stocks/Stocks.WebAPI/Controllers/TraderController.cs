@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using Stocks.Common;
 using Stocks.Model;
-using Stocks.Service;
+using Stocks.Service.Common;
 using Stocks.WebAPI;
 
 namespace Stocks.WebAPI.Controllers
@@ -10,19 +11,23 @@ namespace Stocks.WebAPI.Controllers
     [Route("[controller]/")]
     public class TraderController : ControllerBase
     {
-        private TraderService traderService;
-        public TraderController(IConfiguration configuration)
+        private IService<Trader> traderService;
+        public TraderController(IService<Trader> traderService)
         {
-            this.traderService = new TraderService(configuration.GetConnectionString("DefaultConnection"));
+            this.traderService = traderService;
         }
 
         [HttpGet("traders")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> Get(Guid? traderId = null, string name = "", DateTime? minDateTime = null,
+            DateTime? maxDateTime = null, string orderBy = "Name", string sortOrder = "ASC", int rpp = 10, int pageNumber = 1)
         {
-            // var conn = WebApplication.Create().Configuration.GetConnectionString("DefaultConnection");
             try
             {
-                ICollection<Trader> traders = await traderService.GetAllAsync();
+                IFilter filter = new TraderFilter(traderId, name, minDateTime, maxDateTime);
+                OrderByFilter order = new OrderByFilter(orderBy, sortOrder);
+                PageFilter page = new PageFilter(rpp, pageNumber);
+
+                ICollection<Trader> traders = await traderService.GetAsync(filter, order, page);
                 return Ok(traders);
             }
             catch (Exception ex)
@@ -31,20 +36,6 @@ namespace Stocks.WebAPI.Controllers
             }
         }
 
-        [HttpGet("traders/{traderId:guid}")]
-        public async Task<IActionResult> Get(Guid traderId)
-        {
-            try
-            {
-                Trader trader = await traderService.GetAsync(traderId);
-
-                return Ok(trader);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-
-        }
+      
     }
 }

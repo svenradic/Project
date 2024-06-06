@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Npgsql;
 using Stocks.Common;
 using Stocks.Model;
@@ -19,92 +20,50 @@ namespace Stocks.Repository
             this.connectionString = connectionString;
         }
 
-        public async Task<int> DeleteAsync(Guid id)
+        private NpgsqlCommand CreateCommandSelect(NpgsqlConnection connection, IFilter filter, OrderByFilter order, PageFilter page)
         {
-            using NpgsqlConnection conn = new NpgsqlConnection(connectionString);
-            using NpgsqlCommand comand = new NpgsqlCommand("", conn);
-            conn.Open();
-
-            comand.CommandText = "UPDATE \"Stock\" SET \"IsActive\" = @IsActive WHERE \"Id\" = @stockId";
-
-            comand.Parameters.AddWithValue("@IsActive", false);
-            comand.Parameters.AddWithValue("@stockId", id);
-
-            int commitNumber = await comand.ExecuteNonQueryAsync();
-            conn.Close();
-            return commitNumber;
-        }
-
-        public async Task<Stock> GetAsync(Guid id)
-        {
-            using NpgsqlConnection conn = new NpgsqlConnection(connectionString);
-            using NpgsqlCommand command = new NpgsqlCommand("", conn);
-            Stock stock = new Stock();
-            conn.Open();
-
-            command.CommandText = "SELECT * FROM \"Stock\" WHERE \"Stock\".\"Id\" = @Id and \"IsActive\" = @isActive";
-            command.Parameters.AddWithValue("@Id", id);
-            command.Parameters.AddWithValue("@isActive", true);
-
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    stock.Id = reader.GetGuid(0);
-                    stock.Symbol = reader.GetString(1);
-                    stock.CompanyName = reader.GetString(2);
-                    stock.CurrentPrice = reader.GetDouble(3);
-                    stock.MarketCap = (long)reader.GetDouble(4);
-                    stock.TraderId = reader.GetGuid(5);
-                }
-            }
-            conn.Close();
-            return stock;
-        }
-        private static NpgsqlCommand CreateCommand(NpgsqlConnection conn, StockFilter filter, OrderByFilter order, PageFilter page)
-        {
-            NpgsqlCommand command = new NpgsqlCommand("", conn);
+            NpgsqlCommand command = new NpgsqlCommand("", connection);
             StringBuilder query = new StringBuilder();
             query.Append("SELECT * FROM \"Stock\" WHERE \"IsActive\" = @IsActive");
             
             command.Parameters.AddWithValue("@IsActive", true);
-            if (filter.id != null)
+            if (filter.Id != null)
             {
                 query.Append(" AND \"Id\" = @Id");
-                command.Parameters.AddWithValue("@Id", filter.id);
+                command.Parameters.AddWithValue("@Id", filter.Id);
             }
-            if (filter.symbolQuery != "")
+            if (filter.SymbolQuery != "")
             {
                 query.Append(" AND \"Symbol\" ILIKE @Symbol");
-                command.Parameters.AddWithValue("@Symbol", $"%{filter.symbolQuery}%");
+                command.Parameters.AddWithValue("@Symbol", $"%{filter.SymbolQuery}%");
             }
-            if(filter.companyQuery != "")
+            if(filter.CompanyQuery != "")
             {
                 query.Append(" AND \"CompanyName\" ILIKE @CompanyName");
-                command.Parameters.AddWithValue("@CompanyName", $"%{filter.companyQuery}%");
+                command.Parameters.AddWithValue("@CompanyName", $"%{filter.CompanyQuery}%");
             }
-            if (filter.minMarketCap != null)
+            if (filter.MinMarketCap != null)
             {
                 query.Append(" AND \"MarketCap\" >= @MinMarketCap");
-                command.Parameters.AddWithValue("@MinMarketCap", filter.minMarketCap);
+                command.Parameters.AddWithValue("@MinMarketCap", filter.MinMarketCap);
             }
-            if (filter.maxMarketCap != null)
+            if (filter.MaxMarketCap != null)
             {
                 query.Append(" AND \"MarketCap\" <= @MaxMarketCap");
-                command.Parameters.AddWithValue("@MaxMarketCap", filter.maxMarketCap);
+                command.Parameters.AddWithValue("@MaxMarketCap", filter.MaxMarketCap);
             }
-            if(filter.minCurrentPrice != null)
+            if(filter.MinCurrentPrice != null)
             {
                 query.Append(" AND \"CurrentPrice\" >= @MinCurrentPrice");
-                command.Parameters.AddWithValue("@MinCurrentPrice", filter.minCurrentPrice);
+                command.Parameters.AddWithValue("@MinCurrentPrice", filter.MinCurrentPrice);
             }
-            if(filter.maxCurrentPrice != null)
+            if(filter.MaxCurrentPrice != null)
             {
                 query.Append(" AND \"CurrentPrice\" <= @MaxCurrentPrice");
-                command.Parameters.AddWithValue("@MaxCurrentPrice", filter.maxCurrentPrice);
+                command.Parameters.AddWithValue("@MaxCurrentPrice", filter.MaxCurrentPrice);
             }
 
-            string sortOrder = order.sortOrder.ToUpper() == "DESC" ? "DESC" : "ASC";
+            string sortOrder = order.sortOrder.ToUpper() == "ASC" ? "ASC" : "DESC";
             query.Append($" ORDER BY \"{order.orderBy}\" {sortOrder}");
             
             query.Append(" LIMIT @Limit OFFSET @Offset");
@@ -113,12 +72,55 @@ namespace Stocks.Repository
             command.CommandText = query.ToString();
             return command;
         }
-        public async Task<ICollection<Stock>> GetAsync(StockFilter filter, OrderByFilter order, PageFilter page)
+
+        private NpgsqlCommand CreateCommandPost(Stock stock, NpgsqlConnection connection)
         {
-            using NpgsqlConnection conn = new NpgsqlConnection(connectionString);
-            using NpgsqlCommand command = CreateCommand(conn, filter, order, page);
+            NpgsqlCommand command = new NpgsqlCommand("", connection);
+            StringBuilder query = new StringBuilder();
+
+            query.Append("INSERT INTO \"Stock\" (\"Symbol\", \"CompanyName\", \"CurrentPrice\", \"MarketCap\"");
+            if (stock.TraderId != null)
+            {
+                query.Append(", \"TraderId\"");
+                command.Parameters.AddWithValue("@TraderId", stock.TraderId);
+            }
+            else
+            {
+                query.Append(") VALUES (@Symbol, @CompanyName, @CurrentPrice, @MarketCap)");
+            }
+            command.Parameters.AddWithValue("@Symbol", stock.Symbol);
+            command.Parameters.AddWithValue("@CompanyName", stock.CompanyName);
+            command.Parameters.AddWithValue("@CurrentPrice", stock.CurrentPrice);
+            command.Parameters.AddWithValue("@MarketCap", stock.MarketCap);
+
+            command.CommandText = query.ToString();
+            return command;
+        }
+
+
+        public async Task<int> DeleteAsync(Guid id)
+        {
+            using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+            using NpgsqlCommand comand = new NpgsqlCommand("", connection);
+            connection.Open();
+
+            comand.CommandText = "UPDATE \"Stock\" SET \"IsActive\" = @IsActive WHERE \"Id\" = @stockId";
+
+            comand.Parameters.AddWithValue("@IsActive", false);
+            comand.Parameters.AddWithValue("@stockId", id);
+
+            int commitNumber = await comand.ExecuteNonQueryAsync();
+            connection.Close();
+            return commitNumber;
+        }
+
+       
+        public async Task<ICollection<Stock>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
+        {
+            using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+            using NpgsqlCommand command = CreateCommandSelect(connection, filter, order, page);
             ICollection<Stock> stocks = new List<Stock>();
-            conn.Open();
+            connection.Open();
 
             using (var reader = await command.ExecuteReaderAsync())
             {
@@ -131,72 +133,33 @@ namespace Stocks.Repository
                         CompanyName = reader.GetString(2),
                         CurrentPrice = reader.GetDouble(3),
                         MarketCap = (long)reader.GetDouble(4),
-                        TraderId = reader.GetGuid(5)
+                        TraderId = reader.IsDBNull(5) ? null : reader.GetGuid(5),
                     };
                     stocks.Add(stock);  
                 }
             }
-            conn.Close();
+            connection.Close();
             return stocks;
         }
 
-        public async Task<ICollection<Stock>> GetAllAsync()
-        {
-            using NpgsqlConnection conn = new NpgsqlConnection(connectionString);
-            using NpgsqlCommand command = new NpgsqlCommand("", conn);
-            ICollection<Stock> stocks = new List<Stock>();
-            conn.Open();
-
-            command.CommandText = "SELECT * FROM \"Stock\" WHERE \"IsActive\" = @isActive" ;
-            command.Parameters.AddWithValue("@isActive", true);
-
-
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    var stock = new Stock
-                    {
-                        Id = reader.GetGuid(0),
-                        Symbol = reader.GetString(1),
-                        CompanyName = reader.GetString(2),
-                        CurrentPrice = reader.GetDouble(3),
-                        MarketCap = (long)reader.GetDouble(4),
-                        TraderId = reader.GetGuid(5)
-                    };
-                    stocks.Add(stock);
-
-                }
-            }
-            conn.Close();
-            return stocks;
-        }
 
         public async Task<int> PostAsync(Stock stock)
         {
-            using NpgsqlConnection conn = new NpgsqlConnection(connectionString);
-            using NpgsqlCommand comand = new NpgsqlCommand("", conn);
-            conn.Open();
-
-            comand.CommandText = "INSERT INTO \"Stock\" (\"Symbol\", \"CompanyName\", \"CurrentPrice\", \"MarketCap\", \"TraderId\") " +
-                "VALUES (@Symbol, @CompanyName, @CurrentPrice, @MarketCap, @TraderId)";
-            comand.Parameters.AddWithValue("@Symbol", stock.Symbol);
-            comand.Parameters.AddWithValue("@CompanyName", stock.CompanyName);
-            comand.Parameters.AddWithValue("@CurrentPrice", stock.CurrentPrice);
-            comand.Parameters.AddWithValue("@MarketCap", stock.MarketCap);
-            comand.Parameters.AddWithValue("@TraderId", stock.TraderId);
+            using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+            using NpgsqlCommand comand = CreateCommandPost(stock, connection);
+            connection.Open();
 
             int commitNumber = await comand.ExecuteNonQueryAsync();
 
-            conn.Close();
+            connection.Close();
             return commitNumber;
         }
 
         public async Task<int> PutAsync(Stock stock, Guid id)
         {
-            using NpgsqlConnection conn = new NpgsqlConnection(connectionString);
-            using NpgsqlCommand comand = new NpgsqlCommand("", conn);
-            conn.Open();
+            using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+            using NpgsqlCommand comand = new NpgsqlCommand("", connection);
+            connection.Open();
 
             comand.CommandText = "UPDATE \"Stock\" SET \"Symbol\" = @Symbol, \"CompanyName\" = @CompanyName, " +
                 "\"CurrentPrice\" = @CurrentPrice, \"MarketCap\" = @MarketCap, \"TraderId\" = @TraderId WHERE \"Id\" = @stockId";
@@ -205,11 +168,11 @@ namespace Stocks.Repository
             comand.Parameters.AddWithValue("@CompanyName", stock.CompanyName);
             comand.Parameters.AddWithValue("@CurrentPrice", stock.CurrentPrice);
             comand.Parameters.AddWithValue("@MarketCap", stock.MarketCap);
-            comand.Parameters.AddWithValue("@TraderId", stock.TraderId);
+            comand.Parameters.AddWithValue("@TraderId", stock.TraderId is null ? DBNull.Value : stock.TraderId);
             comand.Parameters.AddWithValue("@stockId", id);
 
             int commitNumber = await comand.ExecuteNonQueryAsync();
-            conn.Close();
+            connection.Close();
             return commitNumber;
         }
     }

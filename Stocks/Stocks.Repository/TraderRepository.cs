@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Npgsql;
+using Stocks.Common;
 using Stocks.Model;
 using Stocks.Repository.Common;
 
@@ -17,67 +18,67 @@ namespace Stocks.Repository
         {
             this.connectionString = connectionString;
         }
+
+        private NpgsqlCommand CreateCommand(NpgsqlConnection connection, IFilter filter, OrderByFilter order, PageFilter page)
+        {
+            NpgsqlCommand command = new NpgsqlCommand("", connection);
+            StringBuilder query = new StringBuilder();
+            query.Append("SELECT  t.\"Id\" , t.\"Name\" , t.\"DateOfBirth\", s.\"Id\", s.\"Symbol\", s.\"CompanyName\", s.\"CurrentPrice\", s.\"MarketCap\", s.\"TraderId\" FROM \"Trader\" t" +
+                " LEFT JOIN \"Stock\" s ON t.\"Id\" = s.\"TraderId\"" +
+                " WHERE t.\"IsActive\" = @isActive AND s.\"IsActive\" = @isActive");
+
+            command.Parameters.AddWithValue("@IsActive", true);
+            if (filter.Id !=  null)
+            {
+                query.Append(" AND t.\"Id\" = @Id");
+                command.Parameters.AddWithValue("@Id", filter.Id);
+            }
+            if (filter.Name != "")
+            {
+                query.Append(" AND t.\"Name\" ILIKE @Name");
+                command.Parameters.AddWithValue("@Name", $"%{filter.Name}%");
+            }
+            if (filter.MinDateOfBirth != null)
+            {
+                query.Append(" AND t.\"DateOfBirth\" >= @DateOfBirth");
+                command.Parameters.AddWithValue("@DateOfBirth", filter.MinDateOfBirth);
+            }
+            if (filter.MaxDateOfBirth != null)
+            {
+                query.Append(" AND t.\"DateOfBirth\" >= @MaxDateOfBirth");
+                command.Parameters.AddWithValue("@MaxDateOfBirth", filter.MaxDateOfBirth);
+            }
+
+            string sortOrder = order.sortOrder.ToUpper() == "ASC" ? "ASC" : "DESC";
+            query.Append($" ORDER BY t.\"{order.orderBy}\" {sortOrder}");
+
+            query.Append(" LIMIT @Limit OFFSET @Offset");
+            command.Parameters.AddWithValue("@Limit", page.rpp);
+            command.Parameters.AddWithValue("@Offset", (page.pageNumber - 1) * page.rpp);
+            command.CommandText = query.ToString();
+            return command;
+        }
         public Task<int> DeleteAsync(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<Trader> GetAsync(Guid id)
+        public Task<int> PostAsync(Stock stock)
         {
-            using NpgsqlConnection conn = new NpgsqlConnection(connectionString);
-            using NpgsqlCommand command = new NpgsqlCommand("", conn);
-            Trader trader = new Trader();
-            conn.Open();
-
-            command.CommandText = "SELECT  t.\"Id\" , t.\"Name\" , t.\"DateOfBirth\", s.\"Id\", s.\"Symbol\", s.\"CompanyName\", s.\"CurrentPrice\", s.\"MarketCap\", s.\"TraderId\" FROM \"Trader\" t" +
-                " LEFT JOIN \"Stock\" s ON t.\"Id\" = s.\"TraderId\"" +
-                "WHERE t.\"IsActive\" = @isActive AND s.\"IsActive\" = @isActive AND t.\"Id\" = @id";
-            command.Parameters.AddWithValue("@Id", id);
-            command.Parameters.AddWithValue("@isActive", true);
-
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    if(trader.Id != reader.GetGuid(0))
-                    {
-                        trader.Id = reader.GetGuid(0);
-                        trader.Name = reader.GetString(1);
-                        trader.DateOfBirth = reader.GetDateTime(2);
-                        trader.Stocks = new List<Stock>();
-                    }
-
-                    if (!reader.IsDBNull(3))
-                    {
-                        Stock stock = new Stock
-                        {
-                            Id = reader.GetGuid(3),
-                            Symbol = reader.GetString(4),
-                            CompanyName = reader.GetString(5),
-                            CurrentPrice = reader.GetDouble(6),
-                            MarketCap = (long)reader.GetDouble(7),
-                            TraderId = reader.GetGuid(8)
-                        };
-
-                        trader.Stocks.Add(stock);
-                    }
-                }
-            }
-            conn.Close();
-            return trader;
+            throw new NotImplementedException();
         }
 
-        public async Task<ICollection<Trader>> GetAllAsync()
+        public Task<int> PutAsync(Stock stock, Guid id)
         {
-            using NpgsqlConnection conn = new NpgsqlConnection(connectionString);
-            using NpgsqlCommand command = new NpgsqlCommand("", conn);
-            ICollection<Trader> traders = new List<Trader>();
-            conn.Open();
+            throw new NotImplementedException();
+        }
 
-            command.CommandText = "SELECT  t.\"Id\" , t.\"Name\" , t.\"DateOfBirth\", s.\"Id\", s.\"Symbol\", s.\"CompanyName\", s.\"CurrentPrice\", s.\"MarketCap\", s.\"TraderId\" FROM \"Trader\" t" +
-                " LEFT JOIN \"Stock\" s ON t.\"Id\" = s.\"TraderId\"" +
-                "WHERE t.\"IsActive\" = @isActive AND s.\"IsActive\" = @isActive";
-            command.Parameters.AddWithValue("@isActive", true);
+        public async Task<ICollection<Trader>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
+        {
+            using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+            using NpgsqlCommand command = CreateCommand(connection, filter, order, page);
+            ICollection<Trader> traders = new List<Trader>();
+            connection.Open();
 
             using (var reader = await command.ExecuteReaderAsync())
             {
@@ -113,7 +114,7 @@ namespace Stocks.Repository
 
                         traders.Add(trader);
                     }
-                    else if(!reader.IsDBNull(3))
+                    else if (!reader.IsDBNull(3))
                     {
                         var stock = new Stock
                         {
@@ -129,19 +130,10 @@ namespace Stocks.Repository
                     }
                 }
             }
-            conn.Close();
+            connection.Close();
 
             return traders;
         }
-
-        public Task<int> PostAsync(Stock stock)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> PutAsync(Stock stock, Guid id)
-        {
-            throw new NotImplementedException();
-        }
     }
+    
 }

@@ -6,27 +6,32 @@ using System.Threading.Tasks;
 
 namespace Stocks.Common
 {
-    public class StockFilter
+    public class StockFilter: IFilter
     {
-        public Guid? id;
-        public string symbolQuery;
-        public string companyQuery;
-        public long? maxMarketCap;
-        public long? minMarketCap;
-        public double? minCurrentPrice;
-        public double? maxCurrentPrice; 
+        public Guid? Id { get; set; }
+        public string SymbolQuery { get; set; }
+        public string CompanyQuery { get; set; }
+        public long? MaxMarketCap { get; set; }
+        public long? MinMarketCap { get; set; }
+        public double? MinCurrentPrice { get; set; }
+        public double? MaxCurrentPrice { get; set; }
+        public string Name { get; set; }
+        public DateTime? MinDateOfBirth { get; set; }
+        public DateTime? MaxDateOfBirth { get; set; }
 
         public StockFilter(Guid? id, string symbolQuery, string companyQuery, long? minMarketCap, long? maxMarketCap, 
             double? minCurrentPrice, double? maxCurrentPrice)
         {
-            this.id = id;
-            this.symbolQuery = symbolQuery;
-            this.companyQuery = companyQuery;
-            this.maxMarketCap = maxMarketCap;
-            this.minMarketCap = minMarketCap;
-            this.minCurrentPrice = minCurrentPrice;
-            this.maxCurrentPrice = maxCurrentPrice; 
-
+            this.Id = id;
+            this.SymbolQuery = symbolQuery;
+            this.CompanyQuery = companyQuery;
+            this.MaxMarketCap = maxMarketCap;
+            this.MinMarketCap = minMarketCap;
+            this.MinCurrentPrice = minCurrentPrice;
+            this.MaxCurrentPrice = maxCurrentPrice;
+            Name = "";
+            MinDateOfBirth = null;
+            MaxDateOfBirth = null;
         }
 
     }

@@ -7,9 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Stocks.Common\Stocks.Common.csproj" />
-    <ProjectReference Include="..\Stocks.Repository\Stocks.Repository.csproj" />
     <ProjectReference Include="..\Stocks.Service.Common\Stocks.Service.Common.csproj" />
+	 <ProjectReference Include="..\Stocks.Repository.Common\Stocks.Repository.Common.csproj" />
   </ItemGroup>
 
 </Project>
