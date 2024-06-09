@@ -19,6 +19,19 @@ namespace Stocks.Common
         public DateTime? MinDateOfBirth { get; set; }
         public DateTime? MaxDateOfBirth { get; set; }
 
+        public StockFilter(Guid id)
+        {
+            Id = id;
+            this.SymbolQuery = "";
+            this.CompanyQuery = "";
+            this.MaxMarketCap = null;
+            this.MinMarketCap = null;
+            this.MinCurrentPrice = null;
+            this.MaxCurrentPrice = null;
+            Name = "";
+            MinDateOfBirth = null;
+            MaxDateOfBirth = null;
+        }
         public StockFilter(Guid? id, string symbolQuery, string companyQuery, long? minMarketCap, long? maxMarketCap, 
             double? minCurrentPrice, double? maxCurrentPrice)
         {

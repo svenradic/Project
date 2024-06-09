@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Autofac" Version="8.0.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Npgsql" Version="8.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -16,9 +17,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Stocks.Common\Stocks.Common.csproj" />
+    <ProjectReference Include="..\Stocks.Mapper\Stocks.Mapper.csproj" />
     <ProjectReference Include="..\Stocks.Model\Stocks.Model.csproj" />
     <ProjectReference Include="..\Stocks.Repository.Common\Stocks.Repository.Common.csproj" />
     <ProjectReference Include="..\Stocks.Repository\Stocks.Repository.csproj" />
+    <ProjectReference Include="..\Stocks.REST_Models\Stocks.REST_Models.csproj" />
     <ProjectReference Include="..\Stocks.Service.Common\Stocks.Service.Common.csproj" />
     <ProjectReference Include="..\Stocks.Service\Stocks.Service.csproj" />
   </ItemGroup>

@@ -12,11 +12,11 @@ namespace Stocks.Repository
 {
     public class TraderRepository : IRepository<Trader>
     {
-        private readonly string connectionString;
+        private readonly string _connectionString;
 
         public TraderRepository(string connectionString)
         {
-            this.connectionString = connectionString;
+            this._connectionString = connectionString;
         }
 
         private NpgsqlCommand CreateCommand(NpgsqlConnection connection, IFilter filter, OrderByFilter order, PageFilter page)
@@ -75,7 +75,7 @@ namespace Stocks.Repository
 
         public async Task<ICollection<Trader>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
         {
-            using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+            using NpgsqlConnection connection = new NpgsqlConnection(_connectionString);
             using NpgsqlCommand command = CreateCommand(connection, filter, order, page);
             ICollection<Trader> traders = new List<Trader>();
             connection.Open();
@@ -133,6 +133,54 @@ namespace Stocks.Repository
             connection.Close();
 
             return traders;
+        }
+        public async Task<Trader?> GetAsync(Guid? id)
+        {
+            using NpgsqlConnection connection = new NpgsqlConnection(_connectionString);
+            using NpgsqlCommand command = new NpgsqlCommand("", connection);
+            Trader trader = new Trader();
+            connection.Open();
+
+            command.CommandText = "SELECT  t.\"Id\" , t.\"Name\" , t.\"DateOfBirth\", s.\"Id\", s.\"Symbol\", s.\"CompanyName\", s.\"CurrentPrice\", s.\"MarketCap\", s.\"TraderId\" FROM \"Trader\" t" +
+                " LEFT JOIN \"Stock\" s ON t.\"Id\" = s.\"TraderId\"" +
+                "WHERE t.\"IsActive\" = @IsActive AND s.\"IsActive\" = @isActive AND t.\"Id\" = @Id";
+            command.Parameters.AddWithValue("@Id", id);
+            command.Parameters.AddWithValue("@IsActive", true);
+
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                if (!reader.HasRows)
+                {
+                    return null;
+                }
+                while (await reader.ReadAsync())
+                {
+                    if (trader.Id != reader.GetGuid(0))
+                    {
+                        trader.Id = reader.GetGuid(0);
+                        trader.Name = reader.GetString(1);
+                        trader.DateOfBirth = reader.GetDateTime(2);
+                        trader.Stocks = new List<Stock>();
+                    }
+
+                    if (!reader.IsDBNull(3))
+                    {
+                        Stock stock = new Stock
+                        {
+                            Id = reader.GetGuid(3),
+                            Symbol = reader.GetString(4),
+                            CompanyName = reader.GetString(5),
+                            CurrentPrice = reader.GetDouble(6),
+                            MarketCap = (long)reader.GetDouble(7),
+                            TraderId = reader.IsDBNull(5) ? null : reader.GetGuid(5)
+                        };
+
+                        trader.Stocks.Add(stock);
+                    }
+                }
+            }
+            connection.Close();
+            return trader;
         }
     }
     

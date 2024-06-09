@@ -1,14 +1,15 @@
 using System.Runtime.CompilerServices;
 using Autofac;
+using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Stocks.Mapper;
 using Stocks.Model;
 using Stocks.Repository;
 using Stocks.Repository.Common;
 using Stocks.Service;
 using Stocks.Service.Common;
-using Stocks.WebAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddAutoMapper(typeof(StocksMapper));
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
@@ -41,6 +42,7 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
 
     containerBuilder.RegisterType<StockService>().As<IService<Stock>>();
     containerBuilder.RegisterType<TraderService>().As<IService<Trader>>();
+
 
 });
 

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using Stocks.Common;
 using Stocks.Model;
+using Stocks.REST_Models;
 using Stocks.Service.Common;
 using Stocks.WebAPI;
 
@@ -11,10 +13,12 @@ namespace Stocks.WebAPI.Controllers
     [Route("[controller]/")]
     public class TraderController : ControllerBase
     {
-        private IService<Trader> traderService;
-        public TraderController(IService<Trader> traderService)
+        private IService<Trader> _traderService;
+        private IMapper _traderMapper;
+        public TraderController(IService<Trader> traderService, IMapper traderMapper)
         {
-            this.traderService = traderService;
+            this._traderService = traderService;
+            this._traderMapper = traderMapper;
         }
 
         [HttpGet("traders")]
@@ -27,8 +31,14 @@ namespace Stocks.WebAPI.Controllers
                 OrderByFilter order = new OrderByFilter(orderBy, sortOrder);
                 PageFilter page = new PageFilter(rpp, pageNumber);
 
-                ICollection<Trader> traders = await traderService.GetAsync(filter, order, page);
-                return Ok(traders);
+                ICollection<Trader> traders = await _traderService.GetAsync(filter, order, page);
+                ICollection<TraderGetRest> tradersRest = new List<TraderGetRest>();
+                foreach (Trader trader in traders)
+                {
+                    TraderGetRest traderRest = _traderMapper.Map<TraderGetRest>(trader);
+                    tradersRest.Add(traderRest);
+                }
+                return Ok(tradersRest);
             }
             catch (Exception ex)
             {
@@ -36,6 +46,26 @@ namespace Stocks.WebAPI.Controllers
             }
         }
 
-      
+        [HttpGet("traders/{traderId:guid}")]
+        public async Task<IActionResult> Get(Guid traderId)
+        {
+            try
+            {
+                Trader? trader = await _traderService.GetAsync(traderId);
+                if(trader == null)
+                {
+                    return NotFound();
+                }
+                return Ok(trader);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+
+        }
     }
+
+
 }
+

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Stocks.Common
 {
@@ -25,6 +26,19 @@ namespace Stocks.Common
             Name = name;
             MinDateOfBirth = minDateOfBirth;
             MaxDateOfBirth = maxDateOfBirth;
+            SymbolQuery = "";
+            CompanyQuery = "";
+            MaxMarketCap = null;
+            MinMarketCap = null;
+            MinCurrentPrice = null;
+            MaxCurrentPrice = null;
+        }
+        public TraderFilter(Guid? id)
+        {
+            Id = id;
+            Name = "";
+            MinDateOfBirth = null;
+            MaxDateOfBirth = null;
             SymbolQuery = "";
             CompanyQuery = "";
             MaxMarketCap = null;

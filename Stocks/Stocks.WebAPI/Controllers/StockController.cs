@@ -1,21 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using Stocks.Common;
 using Stocks.Model;
+using Stocks.REST_Models;
 using Stocks.Service.Common;
+using Stocks.WebAPI.RESTModels;
 
 
 
-namespace Stocks.WebAPI.Controllersyy
+namespace Stocks.WebAPI.Controllers
 {
     [ApiController]
     [Route("[controller]/")]
     public class StockController: ControllerBase
     {
-        private IService<Stock> stockService;
-        public StockController(IService<Stock> stockService)
+        private IService<Stock> _stockService;
+        private IService<Trader> _traderService;
+        private IMapper _stockMapper;
+        public StockController(IService<Stock> stockService, IService<Trader> traderService, IMapper stockMapper)
         {
-            this.stockService = stockService;
+            this._stockService = stockService;
+            this._traderService = traderService;
+            this._stockMapper = stockMapper;
         }
 
         [HttpGet("stocks")]
@@ -29,9 +36,16 @@ namespace Stocks.WebAPI.Controllersyy
                 OrderByFilter order = new OrderByFilter(orderBy, sortOrder);
                 PageFilter page = new PageFilter(rpp, pageNumber);
 
-                ICollection<Stock> stocks = await stockService.GetAsync(filter, order, page);
+                ICollection<Stock> stocks = await _stockService.GetAsync(filter, order, page);
 
-                return Ok(stocks);
+                ICollection<StockGetRest> stocksRest = new List<StockGetRest>();
+                foreach (Stock stock in stocks)
+                {
+                    StockGetRest stockRest = _stockMapper.Map<StockGetRest>(stock);
+                    stocksRest.Add(stockRest);
+
+                }
+                return Ok(stocksRest);
             }
             catch (Exception ex)
             {
@@ -41,15 +55,24 @@ namespace Stocks.WebAPI.Controllersyy
         }
 
         [HttpPost("stocks")]
-        public async Task<IActionResult> Post(Stock stock)
+        public async Task<IActionResult> Post(StockPostRest stockPost)
         {
-            if(stock == null)
+            if(stockPost == null)
             {
                 return BadRequest();
             }
+            if(stockPost.TraderId != null)
+            {
+                Trader? existingTrader = await _traderService.GetAsync(stockPost.TraderId);
+                if(existingTrader == null) 
+                {
+                    return NotFound();
+                }
+            }
             try
             {
-                int commitNumber = await stockService.PostAsync(stock);
+                Stock stock = _stockMapper.Map<Stock>(stockPost);
+                int commitNumber = await _stockService.PostAsync(stock);
 
                 if(commitNumber == 0)
                 {
@@ -65,14 +88,16 @@ namespace Stocks.WebAPI.Controllersyy
         }
 
         [HttpPut("stocks/{stockId:guid}")]
-        public async Task<IActionResult> Put(Stock stock, Guid stockId)
+        public async Task<IActionResult> Put(StockPostRest stockPost, Guid stockId)
         {
-            if (stock == null)
+            if (stockPost == null)
             {
                 return BadRequest();
             }
             try{
-                int commitNumber = await stockService.PutAsync(stock, stockId);
+                Stock stock = _stockMapper.Map<Stock>(stockPost);
+                
+                int commitNumber = await _stockService.PutAsync(stock, stockId);
                 if (commitNumber == 0)
                 {
                     return BadRequest();
@@ -93,7 +118,7 @@ namespace Stocks.WebAPI.Controllersyy
         {
             try
             { 
-                int commitNumber = await stockService.DeleteAsync(stockId);
+                int commitNumber = await _stockService.DeleteAsync(stockId);
                 if (commitNumber == 0)
                 {
                     return BadRequest();

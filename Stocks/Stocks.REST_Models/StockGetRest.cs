@@ -1,6 +1,8 @@
-namespace Stocks.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Stocks.WebAPI.RESTModels
 {
-    public class Stock
+    public class StockGetRest
     {
         public Guid? Id { get; set; }
         public string Symbol { get; set; } = string.Empty;
@@ -8,9 +10,5 @@ namespace Stocks.Model
         public double? CurrentPrice { get; set; }
         public long? MarketCap { get; set; }
         public Guid? TraderId { get; set; }
-        public bool IsActive { get; set; } = true;
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
     }
 }

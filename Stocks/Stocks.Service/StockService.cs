@@ -12,29 +12,33 @@ namespace Stocks.Service
 {
     public class StockService: IService<Stock>
     {
-        private IRepository<Stock> stockRepository;
+        private IRepository<Stock> _stockRepository;
         public StockService(IRepository<Stock> stockRepository)
         {
-            this.stockRepository = stockRepository;
+            this._stockRepository = stockRepository;
         }
-
+        public async Task<Stock> GetAsync(Guid? id)
+        {
+            return await _stockRepository.GetAsync(id);
+        }
         public async Task<int> DeleteAsync(Guid id)
         {
-            return await stockRepository.DeleteAsync(id);
+            return await _stockRepository.DeleteAsync(id);
         }
         public async Task<ICollection<Stock>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
         {
-            return await stockRepository.GetAsync(filter, order, page);
+            return await _stockRepository.GetAsync(filter, order, page);
         }
 
         public async Task<int> PostAsync(Stock stock)
         {
-            return await stockRepository.PostAsync(stock);
+            return await _stockRepository.PostAsync(stock);
         }
 
         public async Task<int> PutAsync(Stock stock, Guid id)
         {
-            return await stockRepository.PutAsync(stock, id);
+            stock.UpdatedAt = DateTime.Now;
+            return await _stockRepository.PutAsync(stock, id);
         }
 
     }

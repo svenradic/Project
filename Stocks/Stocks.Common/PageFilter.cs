@@ -15,5 +15,10 @@ namespace Stocks.Common
             this.rpp = rpp;
             this.pageNumber = pageNumber;
         }
+        public PageFilter()
+        {
+            this.rpp = 10;
+            this.pageNumber = 1;
+        }
     }
 }

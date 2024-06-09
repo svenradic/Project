@@ -15,5 +15,10 @@ namespace Stocks.Common
             this.orderBy = orderBy;
             this.sortOrder = sortOrder;
         }
+        public OrderByFilter()
+        {
+            orderBy = "CreatedAt";
+            sortOrder = "ASC";
+        }
     }
 }

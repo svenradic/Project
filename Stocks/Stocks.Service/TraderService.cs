@@ -13,10 +13,15 @@ namespace Stocks.Service
 {
     public class TraderService : IService<Trader>
     {
-        private IRepository<Trader> traderRepository;
+        private IRepository<Trader> _traderRepository;
         public TraderService(IRepository<Trader> treaderRepository)
         {
-            this.traderRepository = treaderRepository;
+            this._traderRepository = treaderRepository;
+        }
+
+        public async Task<Trader?> GetAsync(Guid? id)
+        {
+            return await _traderRepository.GetAsync(id);
         }
         public Task<int> DeleteAsync(Guid id)
         {
@@ -34,7 +39,7 @@ namespace Stocks.Service
 
         public async Task<ICollection<Trader>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
         {
-            return await traderRepository.GetAsync(filter, order, page);
+            return await _traderRepository.GetAsync(filter, order, page);
         }
     }
 }
