@@ -33,7 +33,7 @@ namespace Stocks.WebAPI.Controllers
             try
             {
                 IFilter filter = new StockFilter(stockId, symbolQuery, companyQuery, minMarketCap, maxMarketCap, minCurrentPrice, maxCurrentPrice);
-                OrderByFilter order = new OrderByFilter(orderBy, sortOrder);
+                SortingParameters order = new SortingParameters(orderBy, sortOrder);
                 PageFilter page = new PageFilter(rpp, pageNumber);
 
                 ICollection<Stock> stocks = await _stockService.GetAsync(filter, order, page);

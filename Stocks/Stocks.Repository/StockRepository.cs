@@ -20,7 +20,7 @@ namespace Stocks.Repository
             this._connectionString = connectionString;
         }
 
-        private NpgsqlCommand CreateCommandSelect(NpgsqlConnection connection, IFilter filter, OrderByFilter order, PageFilter page)
+        private NpgsqlCommand CreateCommandSelect(NpgsqlConnection connection, IFilter filter, SortingParameters order, PageFilter page)
         {
             NpgsqlCommand command = new NpgsqlCommand("", connection);
             StringBuilder query = new StringBuilder();
@@ -143,7 +143,7 @@ namespace Stocks.Repository
         }
 
 
-        public async Task<ICollection<Stock>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
+        public async Task<ICollection<Stock>> GetAsync(IFilter filter, SortingParameters order, PageFilter page)
         {
             using NpgsqlConnection connection = new NpgsqlConnection(_connectionString);
             using NpgsqlCommand command = CreateCommandSelect(connection, filter, order, page);

@@ -37,7 +37,7 @@ namespace Stocks.Service
             throw new NotImplementedException();
         }
 
-        public async Task<ICollection<Trader>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
+        public async Task<ICollection<Trader>> GetAsync(IFilter filter, SortingParameters order, PageFilter page)
         {
             return await _traderRepository.GetAsync(filter, order, page);
         }
