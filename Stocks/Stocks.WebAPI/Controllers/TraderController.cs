@@ -28,7 +28,7 @@ namespace Stocks.WebAPI.Controllers
             try
             {
                 IFilter filter = new TraderFilter(traderId, name, minDateTime, maxDateTime);
-                OrderByFilter order = new OrderByFilter(orderBy, sortOrder);
+                SortingParameters order = new SortingParameters(orderBy, sortOrder);
                 PageFilter page = new PageFilter(rpp, pageNumber);
 
                 ICollection<Trader> traders = await _traderService.GetAsync(filter, order, page);

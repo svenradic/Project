@@ -19,7 +19,7 @@ namespace Stocks.Repository
             this._connectionString = connectionString;
         }
 
-        private NpgsqlCommand CreateCommand(NpgsqlConnection connection, IFilter filter, OrderByFilter order, PageFilter page)
+        private NpgsqlCommand CreateCommand(NpgsqlConnection connection, IFilter filter, SortingParameters order, PageFilter page)
         {
             NpgsqlCommand command = new NpgsqlCommand("", connection);
             StringBuilder query = new StringBuilder();
@@ -73,7 +73,7 @@ namespace Stocks.Repository
             throw new NotImplementedException();
         }
 
-        public async Task<ICollection<Trader>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
+        public async Task<ICollection<Trader>> GetAsync(IFilter filter, SortingParameters order, PageFilter page)
         {
             using NpgsqlConnection connection = new NpgsqlConnection(_connectionString);
             using NpgsqlCommand command = CreateCommand(connection, filter, order, page);

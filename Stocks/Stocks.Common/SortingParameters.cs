@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace Stocks.Common
 {
-    public class OrderByFilter
+    public class SortingParameters
     {
         public string orderBy;
         public string sortOrder;
-        public OrderByFilter(string orderBy, string sortOrder)
+        public SortingParameters(string orderBy, string sortOrder)
         {
             this.orderBy = orderBy;
             this.sortOrder = sortOrder;
         }
-        public OrderByFilter()
+        public SortingParameters()
         {
             orderBy = "CreatedAt";
             sortOrder = "ASC";

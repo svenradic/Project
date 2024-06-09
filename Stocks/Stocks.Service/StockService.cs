@@ -25,7 +25,7 @@ namespace Stocks.Service
         {
             return await _stockRepository.DeleteAsync(id);
         }
-        public async Task<ICollection<Stock>> GetAsync(IFilter filter, OrderByFilter order, PageFilter page)
+        public async Task<ICollection<Stock>> GetAsync(IFilter filter, SortingParameters order, PageFilter page)
         {
             return await _stockRepository.GetAsync(filter, order, page);
         }
