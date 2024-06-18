@@ -42,6 +42,7 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
 
     containerBuilder.RegisterType<StockService>().As<IService<Stock>>();
     containerBuilder.RegisterType<TraderService>().As<IService<Trader>>();
+    
 
 
 });

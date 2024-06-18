@@ -27,10 +27,6 @@ namespace Stocks.Service
         {
             throw new NotImplementedException();
         }
-        public Task<int> PostAsync(Stock stock)
-        {
-            throw new NotImplementedException();
-        }
 
         public Task<int> PutAsync(Stock stock, Guid id)
         {
@@ -40,6 +36,16 @@ namespace Stocks.Service
         public async Task<ICollection<Trader>> GetAsync(IFilter filter, SortingParameters order, PageFilter page)
         {
             return await _traderRepository.GetAsync(filter, order, page);
+        }
+
+        public Task<int> PostAsync(Trader stock)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> PutAsync(Trader stock, Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
