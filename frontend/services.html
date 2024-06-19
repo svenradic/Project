@@ -25,38 +25,89 @@
         <h2>Search Stocks</h2>
         <p>Search your favourite stock and check latest details about it!</p>
       </div>
-      <div class="form">
+      <form class="form" id="form_search">
         <div class="form-group">
           <label for="name">Symbol</label>
-        <input type="text" id="symbol" name="sybol" required>
+        <input type="text" id="symbol" name="sybol" >
         </div>
         
         <div class="form-group">
-          <label for="email">Company</label>
-        <input type="text" id="company" name="company" required> 
+          <label for="name">Company</label>
+        <input type="text" id="company" name="company" > 
         </div>
     
         <div class="form-group">
           <label for="message">Minimum Market Cap</label>
-          <input type="number" id="number" name="number" required> 
+          <input type="number" id="minMarketCap" name="minMarketCap" > 
         </div>
         <div class="form-group">
           <label for="message">Maximum Market Cap</label>
-          <input type="number" id="number" name="number" required> 
+          <input type="number" id="maxMarketCap" name="maxMarketCap" > 
         </div>
         <div class="form-group">
           <label for="message">Minimum Current Price</label>
-          <input type="number" id="number" name="number" required> 
+          <input type="number" id="minCurrentPrice" name="minCurrentPrice" > 
         </div>
         <div class="form-group">
           <label for="message">Maximum Current Price</label>
-          <input type="number" id="number" name="number" required> 
+          <input type="number" id="maxCurrentPrice" name="maxCurrentPrice" > 
         </div>
         
         <button class="submit-button" type="submit">Submit</button>
-      </div>
+      </form>
+      <h2>Create Stock</h2>
+      <form class="form" id="formCreate">
+        <div class="form-group">
+          <label for="name">Symbol</label>
+        <input type="text" id="symbolCreate" name="symbolCreate" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="name">Company</label>
+        <input type="text" id="companyCreate" name="companyCreate" required> 
+        </div>
+    
+        <div class="form-group">
+          <label for="message">Market Cap</label>
+          <input type="number" id="marketCapCreate" name="marketCapCreate" required> 
+        </div>
+
+        <div class="form-group">
+          <label for="message">Current Price</label>
+          <input type="number" id="currentPriceCreate" name="currentPriceCreate" required> 
+        </div>
+        
+        <button class="submit-button" type="submit">Submit</button>
+      </form>
+
     </div>
-   
+   <div class="hidden" id="divEdit">
+    <h2>Edit Stock</h2>
+      <form class="form" id="formEdit">
+        <div class="form-group">
+          <label for="name">Symbol</label>
+        <input type="text" id="symbolEdit" name="symbolEdit" >
+        </div>
+        
+        <div class="form-group">
+          <label for="name">Company</label>
+        <input type="text" id="companyEdit" name="companyEdit" > 
+        </div>
+    
+        <div class="form-group">
+          <label for="message">Market Cap</label>
+          <input type="number" id="marketCapEdit" name="marketCapEdit" > 
+        </div>
+
+        <div class="form-group">
+          <label for="message">Current Price</label>
+          <input type="number" id="currentPriceEdit" name="currentPriceEdit" > 
+        </div>
+        
+        <button class="submit-button" type="submit">Submit</button>
+        <button class="close-button" id="close-button" type="button">Close</button>
+      </form>
+   </div>
 
   <table>
     <thead>
@@ -67,23 +118,13 @@
         <th>Market Cap $</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td>AAPL</td>
-        <td>Apple</td>
-        <td>111</td>
-        <td>123456</td>
-      </tr>
-      <tr>
-        <td>MSFT</td>
-        <td>Microsoft</td>
-        <td>321</td>
-        <td>783616</td>
-      </tr>
+    <tbody id="stocks">
+     
     </tbody>
   </table>
 
   </main>
   
+  <script src="index.js"></script>
 </body>
 </html>

@@ -58,6 +58,10 @@ h1{
   width: 20%;
   align-self: center;
 }
+.close-button{
+  width: 20%;
+  align-self: center;
+}
 
 .table-container h2 {
   margin-bottom: 1rem;
@@ -78,6 +82,7 @@ table {
   width: 100%;
   box-sizing: border-box;
   height: auto;
+  height: fit-content;
 }
 
 
@@ -90,4 +95,8 @@ th, td {
 
 tbody tr:nth-child(even) {
   background-color: #f9f9f9;
+}
+
+.hidden{
+  display: none;
 }
