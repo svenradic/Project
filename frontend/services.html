@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <nav>
+    <div class="navbar">
+      <div class="logo"><a href="index.html">Stocks</a></div>
+      <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+      </div>
+  </nav>
+  <h1>Services</h1>
+  <main>
+    <div>
+      
+      <div>
+        <h2>Search Stocks</h2>
+        <p>Search your favourite stock and check latest details about it!</p>
+      </div>
+      <form class="form" id="form_search">
+        <div class="form-group">
+          <label for="name">Symbol</label>
+        <input type="text" id="symbol" name="sybol" >
+        </div>
+        
+        <div class="form-group">
+          <label for="name">Company</label>
+        <input type="text" id="company" name="company" > 
+        </div>
+    
+        <div class="form-group">
+          <label for="message">Minimum Market Cap</label>
+          <input type="number" id="minMarketCap" name="minMarketCap" > 
+        </div>
+        <div class="form-group">
+          <label for="message">Maximum Market Cap</label>
+          <input type="number" id="maxMarketCap" name="maxMarketCap" > 
+        </div>
+        <div class="form-group">
+          <label for="message">Minimum Current Price</label>
+          <input type="number" id="minCurrentPrice" name="minCurrentPrice" > 
+        </div>
+        <div class="form-group">
+          <label for="message">Maximum Current Price</label>
+          <input type="number" id="maxCurrentPrice" name="maxCurrentPrice" > 
+        </div>
+        
+        <button class="submit-button" type="submit">Submit</button>
+      </form>
+      <h2>Create Stock</h2>
+      <form class="form" id="formCreate">
+        <div class="form-group">
+          <label for="name">Symbol</label>
+        <input type="text" id="symbolCreate" name="symbolCreate" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="name">Company</label>
+        <input type="text" id="companyCreate" name="companyCreate" required> 
+        </div>
+    
+        <div class="form-group">
+          <label for="message">Market Cap</label>
+          <input type="number" id="marketCapCreate" name="marketCapCreate" required> 
+        </div>
+
+        <div class="form-group">
+          <label for="message">Current Price</label>
+          <input type="number" id="currentPriceCreate" name="currentPriceCreate" required> 
+        </div>
+        
+        <button class="submit-button" type="submit">Submit</button>
+      </form>
+
+    </div>
+   <div class="hidden" id="divEdit">
+    <h2>Edit Stock</h2>
+      <form class="form" id="formEdit">
+        <div class="form-group">
+          <label for="name">Symbol</label>
+        <input type="text" id="symbolEdit" name="symbolEdit" >
+        </div>
+        
+        <div class="form-group">
+          <label for="name">Company</label>
+        <input type="text" id="companyEdit" name="companyEdit" > 
+        </div>
+    
+        <div class="form-group">
+          <label for="message">Market Cap</label>
+          <input type="number" id="marketCapEdit" name="marketCapEdit" > 
+        </div>
+
+        <div class="form-group">
+          <label for="message">Current Price</label>
+          <input type="number" id="currentPriceEdit" name="currentPriceEdit" > 
+        </div>
+        
+        <button class="submit-button" type="submit">Submit</button>
+        <button class="close-button" id="close-button" type="button">Close</button>
+      </form>
+   </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Company Name</th>
+        <th>Current Price $</th>
+        <th>Market Cap $</th>
+      </tr>
+    </thead>
+    <tbody id="stocks">
+     
+    </tbody>
+  </table>
+
+  </main>
+  
+  <script src="index.js"></script>
+</body>
+</html>
