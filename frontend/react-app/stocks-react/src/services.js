@@ -60,3 +60,14 @@ export async function getStock(id){
 
   }
 }
+
+export async function filterStock(searchStock){
+  try{
+    const response = stockClient.get('', {params: searchStock});
+    return (await response).data;
+  }
+  catch(error){
+    console.error('Error posting stock:', error);
+    throw error;
+  }
+}
