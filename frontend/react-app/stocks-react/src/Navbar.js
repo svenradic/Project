@@ -1,16 +1,36 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import './App.css';
+import { Link } from 'react-router-dom'
+import { UserContext } from './UserProvider';
 
 function Navbar() {
+  const { getUser, logout } = useContext(UserContext);
+
   return (
     <nav>
       <div className="navbar">
-        <div className="logo"><a href="index.html">Stocks</a></div>
+        <div className="logo"><Link to="/">
+            Stocks
+          </Link></div>
         <div className="nav-links">
-            <a href="index.html">Home</a>
-            <a href="services.html">Services</a>
-            <a href="about.html">About</a>
-            <a href="contact.html">Contact</a>
+          <Link to="/Services">
+            Services
+          </Link>
+          <Link to="/AboutUs">
+            About
+          </Link>
+          <Link to="/ContactUs">
+            Contact
+          </Link>
+          {
+            getUser() ? 
+            <a onClick={() => logout()}>Logout</a>: 
+            <Link to="/Login">
+              Login
+            </Link> 
+          }
+          
+          
         </div>
       </div>
   </nav>

@@ -1,8 +1,10 @@
 import React from 'react'
-import { postStock, getStocks } from './services';
+import { postStock } from './services';
+import { useNavigate } from 'react-router-dom';
 
-export default function FormCreate({stocks, setStocks}) {
+export default function FormCreate() {
   const [stockCreate, setStockCreate] = React.useState({});
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -10,8 +12,9 @@ export default function FormCreate({stocks, setStocks}) {
   };
   async function createStock(){
     const response = postStock(stockCreate);
-    const data = await getStocks();
-    setStocks(data);
+    if(response){
+      navigate('/Services');
+    }
   }
 
   return (

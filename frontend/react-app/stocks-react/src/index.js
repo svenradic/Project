@@ -1,15 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import StockList from './StockList';
 import reportWebVitals from './reportWebVitals';
-import Navbar from './Navbar';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './Routes/Routes';
+import { UserProvider } from './UserProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Navbar/>
-    <StockList />
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
   </React.StrictMode>
 );
 

@@ -1,9 +1,10 @@
 import React from 'react'
+import StockList from '../StockList'
 
 function Services() {
   return (
     <div>
-      <h1>This is Services page</h1>
+      <StockList/>
     </div>
   )
 }
